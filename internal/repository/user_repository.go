@@ -23,7 +23,7 @@ func NewUserRepository(client *supabase.Client) UserRepository {
 
 func (r *userRepository) Create(user *models.User) error {
 	var results []models.User
-	err := r.client.DB.From("users").Insert(user).Execute(&results)
+	_, err := r.client.From("users").Insert(user, false, "", "*", "").ExecuteTo(&results)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
 	}
@@ -35,10 +35,10 @@ func (r *userRepository) Create(user *models.User) error {
 
 func (r *userRepository) FindByTelegramID(telegramID string) (*models.User, error) {
 	var results []models.User
-	err := r.client.DB.From("users").
-		Select("*").
+	_, err := r.client.From("users").
+		Select("*", "", false).
 		Eq("telegram_id", telegramID).
-		Execute(&results)
+		ExecuteTo(&results)
 	if err != nil {
 		return nil, err
 	}
@@ -53,9 +53,9 @@ func (r *userRepository) UpdateLastActive(telegramID string) error {
 	updates := map[string]interface{}{
 		"last_active": "now()",
 	}
-	err := r.client.DB.From("users").
-		Update(updates).
+	_, err := r.client.From("users").
+		Update(updates, "*", "").
 		Eq("telegram_id", telegramID).
-		Execute(&results)
+		ExecuteTo(&results)
 	return err
 }
