@@ -4,37 +4,27 @@ import (
 	"fmt"
 	"os"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/supabase-community/supabase-go"
 )
 
 type Config struct {
-	DatabaseURL string
+	SupabaseURL string
+	SupabaseKey string
 	Port        string
 }
 
 func New() *Config {
 	return &Config{
-		DatabaseURL: os.Getenv("DATABASE_URL"),
+		SupabaseURL: os.Getenv("SUPABASE_URL"),
+		SupabaseKey: os.Getenv("SUPABASE_KEY"),
 		Port:        os.Getenv("PORT"),
 	}
 }
 
-func NewDatabase(cfg *Config) (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(cfg.DatabaseURL), &gorm.Config{})
+func NewSupabaseClient(cfg *Config) (*supabase.Client, error) {
+	client, err := supabase.NewClient(cfg.SupabaseURL, cfg.SupabaseKey, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("failed to create Supabase client: %w", err)
 	}
-
-	// Test connection
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, err
-	}
-
-	if err := sqlDB.Ping(); err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return client, nil
 }

@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"time"
+	"fmt"
 
+	"github.com/supabase-community/supabase-go"
 	"github.com/yourusername/pokemon-chatbot-api/internal/models"
-	"gorm.io/gorm"
 )
 
 type UserRepository interface {
@@ -14,28 +14,48 @@ type UserRepository interface {
 }
 
 type userRepository struct {
-	db *gorm.DB
+	client *supabase.Client
 }
 
-func NewUserRepository(db *gorm.DB) UserRepository {
-	return &userRepository{db: db}
+func NewUserRepository(client *supabase.Client) UserRepository {
+	return &userRepository{client: client}
 }
 
 func (r *userRepository) Create(user *models.User) error {
-	return r.db.Create(user).Error
+	var results []models.User
+	err := r.client.DB.From("users").Insert(user).Execute(&results)
+	if err != nil {
+		return fmt.Errorf("failed to create user: %w", err)
+	}
+	if len(results) > 0 {
+		*user = results[0]
+	}
+	return nil
 }
 
 func (r *userRepository) FindByTelegramID(telegramID string) (*models.User, error) {
-	var user models.User
-	err := r.db.Where("telegram_id = ?", telegramID).First(&user).Error
+	var results []models.User
+	err := r.client.DB.From("users").
+		Select("*").
+		Eq("telegram_id", telegramID).
+		Execute(&results)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	if len(results) == 0 {
+		return nil, fmt.Errorf("user not found")
+	}
+	return &results[0], nil
 }
 
 func (r *userRepository) UpdateLastActive(telegramID string) error {
-	return r.db.Model(&models.User{}).
-		Where("telegram_id = ?", telegramID).
-		Update("last_active", time.Now()).Error
+	var results []models.User
+	updates := map[string]interface{}{
+		"last_active": "now()",
+	}
+	err := r.client.DB.From("users").
+		Update(updates).
+		Eq("telegram_id", telegramID).
+		Execute(&results)
+	return err
 }
