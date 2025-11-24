@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"time"
 
 	"github.com/yourusername/pokemon-chatbot-api/internal/models"
 	"github.com/yourusername/pokemon-chatbot-api/internal/repository"
@@ -42,11 +43,14 @@ func (s *userService) Register(telegramID, firstName, lastName, username string)
 	}
 
 	// Create new user
+	now := time.Now()
 	user := &models.User{
-		TelegramID: telegramID,
-		FirstName:  firstName,
-		LastName:   lastName,
-		Username:   username,
+		TelegramID:   telegramID,
+		FirstName:    firstName,
+		LastName:     lastName,
+		Username:     username,
+		RegisteredAt: now,
+		LastActive:   now,
 	}
 
 	if err := s.repo.Create(user); err != nil {
