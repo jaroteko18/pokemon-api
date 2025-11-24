@@ -22,14 +22,8 @@ func main() {
 	// Initialize config
 	cfg := config.New()
 
-	// Initialize Supabase client
-	supabaseClient, err := config.NewSupabaseClient(cfg)
-	if err != nil {
-		log.Fatal("Failed to create Supabase client:", err)
-	}
-
 	// Initialize repositories
-	userRepo := repository.NewUserRepository(supabaseClient)
+	userRepo := repository.NewUserRepository(cfg.SupabaseURL, cfg.SupabaseKey)
 
 	// Initialize services
 	userService := services.NewUserService(userRepo)
