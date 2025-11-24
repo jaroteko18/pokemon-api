@@ -1,6 +1,6 @@
 module github.com/yourusername/pokemon-chatbot-api
 
-go 1.21
+go 1.23
 
 require (
 	github.com/bytedance/sonic v1.14.0 // indirect
