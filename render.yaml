@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: pokemon-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://postgres:9jyP5V7Jslq1fRC1@db.kwrhzjuufxwedzbsxjjj.supabase.co:5432/postgres?sslmode=require
+      - key: PORT
+        value: 8080
