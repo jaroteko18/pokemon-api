@@ -49,8 +49,8 @@ func (s *userService) Register(telegramID, firstName, lastName, username string)
 		FirstName:    firstName,
 		LastName:     lastName,
 		Username:     username,
-		RegisteredAt: now,
-		LastActive:   now,
+		RegisteredAt: &now,
+		LastActive:   &now,
 	}
 
 	if err := s.repo.Create(user); err != nil {
