@@ -39,9 +39,10 @@ func (h *UserHandler) Register(c *gin.Context) {
 		req.Username,
 	)
 	if err != nil {
+		// Log the actual error for debugging
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
-			"error":   "Internal server error",
+			"error":   err.Error(), // Show actual error
 		})
 		return
 	}
