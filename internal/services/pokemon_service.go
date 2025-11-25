@@ -65,6 +65,11 @@ func (s *pokemonService) GetPokemon(nameOrID string) (*PokemonResponse, error) {
 		return &PokemonResponse{
 			Found:   false,
 			Message: fmt.Sprintf("Sorry we don't have information for <%s>", nameOrID),
+			Data: &PokemonData{
+				Name:   "Not Found",
+				Types:  "Unknown",
+				Sprite: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png",
+			},
 		}, nil
 	}
 
