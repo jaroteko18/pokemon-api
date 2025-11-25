@@ -18,8 +18,9 @@ type pokemonService struct {
 }
 
 type PokemonResponse struct {
-	Found bool         `json:"found"`
-	Data  *PokemonData `json:"data,omitempty"`
+	Found   bool         `json:"found"`
+	Message string       `json:"message"`
+	Data    *PokemonData `json:"data,omitempty"`
 }
 
 type PokemonData struct {
@@ -61,7 +62,10 @@ func (s *pokemonService) GetPokemon(nameOrID string) (*PokemonResponse, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
-		return &PokemonResponse{Found: false}, nil
+		return &PokemonResponse{
+			Found:   false,
+			Message: fmt.Sprintf("Sorry we don't have information for <%s>", nameOrID),
+		}, nil
 	}
 
 	if resp.StatusCode != 200 {
@@ -73,9 +77,14 @@ func (s *pokemonService) GetPokemon(nameOrID string) (*PokemonResponse, error) {
 		return nil, err
 	}
 
+	data := s.transformData(rawData)
+	message := fmt.Sprintf("%s is an <%s> type Pokemon with %s weight and %s height, here's a picture of %s.",
+		data.Name, data.Types, data.Weight, data.Height, data.Name)
+
 	return &PokemonResponse{
-		Found: true,
-		Data:  s.transformData(rawData),
+		Found:   true,
+		Message: message,
+		Data:    data,
 	}, nil
 }
 
