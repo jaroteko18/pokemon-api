@@ -1,9 +1,11 @@
 # Pokemon Chatbot Architecture Diagram
 
-**Status**: Complete & Deployed
+**Status**: SUBMITTED (November 25, 2025)
 **Bot Version**: v1.0.5
+**Author**: Jarot Eko Saputra
 **Telegram**: [@jeko_pokemon_bot](https://t.me/jeko_pokemon_bot)
 **API**: https://pokemon-api-production-3864.up.railway.app
+**Dashboard**: https://poke-dash-central.lovable.app
 
 ## System Architecture Overview
 
