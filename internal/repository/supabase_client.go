@@ -61,6 +61,35 @@ func (c *SupabaseClient) Insert(table string, data interface{}) ([]byte, error) 
 	return body, nil
 }
 
+// SelectAll performs a GET request to fetch all records
+func (c *SupabaseClient) SelectAll(table string) ([]byte, error) {
+	url := fmt.Sprintf("%s/%s?select=*&order=registered_at.desc", c.baseURL, table)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("apikey", c.apiKey)
+	req.Header.Set("Authorization", "Bearer "+c.apiKey)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	return body, nil
+}
+
 // Select performs a GET request with optional filters
 func (c *SupabaseClient) Select(table, column, value string) ([]byte, error) {
 	url := fmt.Sprintf("%s/%s?%s=eq.%s&select=*", c.baseURL, table, column, value)

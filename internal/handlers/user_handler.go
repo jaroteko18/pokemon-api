@@ -83,3 +83,20 @@ func (h *UserHandler) CheckRegistration(c *gin.Context) {
 		"registered": registered,
 	})
 }
+
+func (h *UserHandler) ListUsers(c *gin.Context) {
+	users, err := h.service.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"count":   len(users),
+		"users":   users,
+	})
+}

@@ -55,6 +55,7 @@ func main() {
 		// User routes
 		users := api.Group("/users")
 		{
+			users.GET("", userHandler.ListUsers)
 			users.POST("/register", userHandler.Register)
 			users.GET("/:telegramId", userHandler.GetUser)
 			users.GET("/:telegramId/check", userHandler.CheckRegistration)

@@ -12,6 +12,7 @@ import (
 type UserService interface {
 	Register(telegramID, firstName, lastName, username string) (*RegisterResponse, error)
 	GetUserByTelegramID(telegramID string) (*models.User, error)
+	GetAllUsers() ([]models.User, error)
 	IsUserRegistered(telegramID string) (bool, error)
 }
 
@@ -66,6 +67,10 @@ func (s *userService) Register(telegramID, firstName, lastName, username string)
 
 func (s *userService) GetUserByTelegramID(telegramID string) (*models.User, error) {
 	return s.repo.FindByTelegramID(telegramID)
+}
+
+func (s *userService) GetAllUsers() ([]models.User, error) {
+	return s.repo.FindAll()
 }
 
 func (s *userService) IsUserRegistered(telegramID string) (bool, error) {

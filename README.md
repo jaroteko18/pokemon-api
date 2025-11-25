@@ -1,5 +1,7 @@
 # Pokemon Chatbot API
 
+**Status**: ✅ Complete & Deployed
+
 A Golang-based backend API for the Pokemon Information Chatbot, built for the Kata.ai Software Engineer Enterprise assignment.
 
 ## Live Demo
@@ -215,19 +217,20 @@ fetchPokemon:
 
 ### Using Result in Bot
 ```yaml
-showPokemonResult:
+# Show Pokemon description
+showPokemonInfo:
   type: text
   options:
     text: $(result.message)
 
-showPokemonImage:
+# Show Pokemon image (works on Telegram!)
+showPokemonImageOK:
   type: template
   options:
-    type: carousel
+    type: image
     items:
-      - title: $(result.data.name)
-        text: 'Type: $(result.data.types)'
-        thumbnailImageUrl: $(result.data.sprite)
+      originalContentUrl: $(result.data.sprite)
+      previewImageUrl: $(result.data.sprite)
 ```
 
 ## Environment Variables

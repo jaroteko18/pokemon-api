@@ -10,6 +10,7 @@ import (
 type UserRepository interface {
 	Create(user *models.User) error
 	FindByTelegramID(telegramID string) (*models.User, error)
+	FindAll() ([]models.User, error)
 	UpdateLastActive(telegramID string) error
 }
 
@@ -57,6 +58,20 @@ func (r *userRepository) FindByTelegramID(telegramID string) (*models.User, erro
 	}
 
 	return &results[0], nil
+}
+
+func (r *userRepository) FindAll() ([]models.User, error) {
+	body, err := r.client.SelectAll("users")
+	if err != nil {
+		return nil, err
+	}
+
+	var users []models.User
+	if err := json.Unmarshal(body, &users); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	return users, nil
 }
 
 func (r *userRepository) UpdateLastActive(telegramID string) error {
