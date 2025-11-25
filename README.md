@@ -18,6 +18,8 @@ A Golang-based backend API for the Pokemon Information Chatbot, built for the Ka
 - RESTful API with Gin framework
 - Image sprite URLs for Pokemon display
 - Production deployment on Railway
+- **Dashboard APIs**: Paginated users list, search statistics
+- **Search tracking**: Pokemon searches logged to database
 
 ## Tech Stack
 
@@ -115,6 +117,40 @@ Response (Not Found):
 }
 ```
 
+### List Users (Paginated) - Dashboard API
+```
+GET /api/users?page=1&limit=10
+
+Response:
+{
+  "success": true,
+  "data": {
+    "users": [...],
+    "total": 39,
+    "page": 1,
+    "limit": 10,
+    "total_pages": 4
+  }
+}
+```
+
+### Search Statistics - Dashboard API
+```
+GET /api/stats/searches
+
+Response:
+{
+  "success": true,
+  "stats": {
+    "total_searches": 15,
+    "found_searches": 12,
+    "not_found_searches": 3,
+    "top_searched": [{"pokemon_name": "Pikachu", "count": 5}],
+    "recent_searches": [...]
+  }
+}
+```
+
 ## Project Structure
 
 ```
@@ -126,13 +162,17 @@ pokemon-chatbot-api/
 │   ├── config/
 │   │   └── config.go            # Configuration, Supabase client
 │   ├── handlers/
-│   │   ├── user_handler.go      # User API handlers
-│   │   └── pokemon_handler.go   # Pokemon API handlers
+│   │   ├── user_handler.go      # User API handlers (register, list, paginate)
+│   │   └── pokemon_handler.go   # Pokemon API handlers (search, stats)
 │   ├── repository/
-│   │   └── user_repository.go   # User data access (Supabase REST)
-│   └── services/
-│       ├── user_service.go      # User business logic
-│       └── pokemon_service.go   # Pokemon logic + PokeAPI integration
+│   │   ├── supabase_client.go   # Supabase REST client
+│   │   ├── user_repository.go   # User data access
+│   │   └── search_repository.go # Search tracking data access
+│   ├── services/
+│   │   ├── user_service.go      # User business logic
+│   │   └── pokemon_service.go   # Pokemon + search logging
+│   └── models/
+│       └── user.go              # User model
 ├── go.mod
 ├── go.sum
 └── README.md
@@ -178,6 +218,7 @@ curl http://localhost:8080/api/pokemon/pikachu
 ## Database Schema
 
 ```sql
+-- Users table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     telegram_id VARCHAR(255) UNIQUE NOT NULL,
@@ -189,6 +230,18 @@ CREATE TABLE users (
 );
 
 CREATE INDEX idx_telegram_id ON users(telegram_id);
+
+-- Pokemon search tracking
+CREATE TABLE pokemon_searches (
+    id SERIAL PRIMARY KEY,
+    pokemon_name VARCHAR(255) NOT NULL,
+    pokemon_id INTEGER,
+    found BOOLEAN DEFAULT true,
+    searched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_pokemon_name ON pokemon_searches(pokemon_name);
+CREATE INDEX idx_searched_at ON pokemon_searches(searched_at DESC);
 ```
 
 ## Kata Platform Integration
@@ -259,6 +312,6 @@ User (Telegram) → Kata Platform → Backend API (Railway) → Supabase + PokeA
 
 ## Author
 
-**Jaro Teko Saputra**
+**Jarot Eko Saputra**
 Software Engineer Enterprise / Bot Builder Assignment
 Kata.ai - November 2025
