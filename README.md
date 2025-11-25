@@ -304,7 +304,7 @@ The API auto-deploys from GitHub `main` branch.
 
 ## Architecture
 
-See [ARCHITECTURE_DIAGRAM.md](../ARCHITECTURE_DIAGRAM.md) for complete system architecture.
+See [ARCHITECTURE_DIAGRAM.md](./ARCHITECTURE_DIAGRAM.md) for complete system architecture.
 
 ```
 User (Telegram) → Kata Platform → Backend API (Railway) → Supabase + PokeAPI
