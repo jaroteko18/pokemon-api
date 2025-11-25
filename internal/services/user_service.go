@@ -13,6 +13,7 @@ type UserService interface {
 	Register(telegramID, firstName, lastName, username string) (*RegisterResponse, error)
 	GetUserByTelegramID(telegramID string) (*models.User, error)
 	GetAllUsers() ([]models.User, error)
+	GetUsersPaginated(page, limit int) ([]models.User, int, error)
 	IsUserRegistered(telegramID string) (bool, error)
 }
 
@@ -71,6 +72,18 @@ func (s *userService) GetUserByTelegramID(telegramID string) (*models.User, erro
 
 func (s *userService) GetAllUsers() ([]models.User, error) {
 	return s.repo.FindAll()
+}
+
+func (s *userService) GetUsersPaginated(page, limit int) ([]models.User, int, error) {
+	users, err := s.repo.FindAllPaginated(page, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	total, err := s.repo.Count()
+	if err != nil {
+		return nil, 0, err
+	}
+	return users, total, nil
 }
 
 func (s *userService) IsUserRegistered(telegramID string) (bool, error) {

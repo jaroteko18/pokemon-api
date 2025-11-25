@@ -11,6 +11,8 @@ type UserRepository interface {
 	Create(user *models.User) error
 	FindByTelegramID(telegramID string) (*models.User, error)
 	FindAll() ([]models.User, error)
+	FindAllPaginated(page, limit int) ([]models.User, error)
+	Count() (int, error)
 	UpdateLastActive(telegramID string) error
 }
 
@@ -72,6 +74,28 @@ func (r *userRepository) FindAll() ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+func (r *userRepository) FindAllPaginated(page, limit int) ([]models.User, error) {
+	body, err := r.client.SelectAllPaginated("users", page, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []models.User
+	if err := json.Unmarshal(body, &users); err != nil {
+		return nil, fmt.Errorf("failed to parse response: %w", err)
+	}
+
+	return users, nil
+}
+
+func (r *userRepository) Count() (int, error) {
+	users, err := r.FindAll()
+	if err != nil {
+		return 0, err
+	}
+	return len(users), nil
 }
 
 func (r *userRepository) UpdateLastActive(telegramID string) error {

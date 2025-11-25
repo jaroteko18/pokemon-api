@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yourusername/pokemon-chatbot-api/internal/services"
@@ -85,7 +86,24 @@ func (h *UserHandler) CheckRegistration(c *gin.Context) {
 }
 
 func (h *UserHandler) ListUsers(c *gin.Context) {
-	users, err := h.service.GetAllUsers()
+	// Get pagination params
+	pageStr := c.DefaultQuery("page", "1")
+	limitStr := c.DefaultQuery("limit", "10")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	users, total, err := h.service.GetUsersPaginated(page, limit)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"success": false,
@@ -94,9 +112,16 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		return
 	}
 
+	totalPages := (total + limit - 1) / limit
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
-		"count":   len(users),
-		"users":   users,
+		"data": gin.H{
+			"users":       users,
+			"total":       total,
+			"page":        page,
+			"limit":       limit,
+			"total_pages": totalPages,
+		},
 	})
 }

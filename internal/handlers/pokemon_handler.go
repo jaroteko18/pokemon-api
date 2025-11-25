@@ -62,3 +62,19 @@ func (h *PokemonHandler) SearchPokemon(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
+
+func (h *PokemonHandler) GetSearchStats(c *gin.Context) {
+	stats, err := h.service.GetSearchStats()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"stats":   stats,
+	})
+}

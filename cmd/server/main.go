@@ -24,10 +24,11 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(cfg.SupabaseURL, cfg.SupabaseKey)
+	searchRepo := repository.NewSearchRepository(cfg.SupabaseURL, cfg.SupabaseKey)
 
 	// Initialize services
 	userService := services.NewUserService(userRepo)
-	pokemonService := services.NewPokemonService()
+	pokemonService := services.NewPokemonService(searchRepo)
 
 	// Initialize handlers
 	userHandler := handlers.NewUserHandler(userService)
@@ -66,6 +67,12 @@ func main() {
 		{
 			pokemon.GET("/:name", pokemonHandler.GetPokemon)
 			pokemon.GET("/search/:query", pokemonHandler.SearchPokemon)
+		}
+
+		// Stats routes
+		stats := api.Group("/stats")
+		{
+			stats.GET("/searches", pokemonHandler.GetSearchStats)
 		}
 	}
 

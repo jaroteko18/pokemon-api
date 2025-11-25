@@ -6,15 +6,19 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/yourusername/pokemon-chatbot-api/internal/repository"
 )
 
 type PokemonService interface {
 	GetPokemon(nameOrID string) (*PokemonResponse, error)
+	GetSearchStats() (*repository.SearchStats, error)
 }
 
 type pokemonService struct {
-	client  *http.Client
-	baseURL string
+	client     *http.Client
+	baseURL    string
+	searchRepo repository.SearchRepository
 }
 
 type PokemonResponse struct {
@@ -43,12 +47,13 @@ type PokemonStats struct {
 	Speed     int `json:"speed"`
 }
 
-func NewPokemonService() PokemonService {
+func NewPokemonService(searchRepo repository.SearchRepository) PokemonService {
 	return &pokemonService{
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		baseURL: "https://pokeapi.co/api/v2",
+		baseURL:    "https://pokeapi.co/api/v2",
+		searchRepo: searchRepo,
 	}
 }
 
@@ -62,6 +67,10 @@ func (s *pokemonService) GetPokemon(nameOrID string) (*PokemonResponse, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
+		// Log not found search
+		if s.searchRepo != nil {
+			s.searchRepo.LogSearch(nameOrID, nil, false)
+		}
 		return &PokemonResponse{
 			Found:   false,
 			Message: fmt.Sprintf("Sorry we don't have information for <%s>", nameOrID),
@@ -86,11 +95,24 @@ func (s *pokemonService) GetPokemon(nameOrID string) (*PokemonResponse, error) {
 	message := fmt.Sprintf("%s is an <%s> type Pokemon with %s weight and %s height, here's a picture of %s.",
 		data.Name, data.Types, data.Weight, data.Height, data.Name)
 
+	// Log successful search
+	if s.searchRepo != nil {
+		pokemonID := data.ID
+		s.searchRepo.LogSearch(data.Name, &pokemonID, true)
+	}
+
 	return &PokemonResponse{
 		Found:   true,
 		Message: message,
 		Data:    data,
 	}, nil
+}
+
+func (s *pokemonService) GetSearchStats() (*repository.SearchStats, error) {
+	if s.searchRepo == nil {
+		return nil, fmt.Errorf("search repository not configured")
+	}
+	return s.searchRepo.GetStats()
 }
 
 func (s *pokemonService) transformData(raw map[string]interface{}) *PokemonData {

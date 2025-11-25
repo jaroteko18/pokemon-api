@@ -61,9 +61,45 @@ func (c *SupabaseClient) Insert(table string, data interface{}) ([]byte, error) 
 	return body, nil
 }
 
+// SelectAllPaginated performs a GET request with pagination
+func (c *SupabaseClient) SelectAllPaginated(table string, page, limit int) ([]byte, error) {
+	offset := (page - 1) * limit
+	url := fmt.Sprintf("%s/%s?select=*&order=registered_at.desc&limit=%d&offset=%d", c.baseURL, table, limit, offset)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("apikey", c.apiKey)
+	req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	req.Header.Set("Prefer", "count=exact")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+	}
+
+	return body, nil
+}
+
 // SelectAll performs a GET request to fetch all records
 func (c *SupabaseClient) SelectAll(table string) ([]byte, error) {
-	url := fmt.Sprintf("%s/%s?select=*&order=registered_at.desc", c.baseURL, table)
+	return c.SelectAllOrdered(table, "registered_at.desc")
+}
+
+// SelectAllOrdered performs a GET request to fetch all records with custom ordering
+func (c *SupabaseClient) SelectAllOrdered(table string, order string) ([]byte, error) {
+	url := fmt.Sprintf("%s/%s?select=*&order=%s", c.baseURL, table, order)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
