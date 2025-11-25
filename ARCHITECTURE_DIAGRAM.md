@@ -84,7 +84,7 @@
 ┌──────────────────────────────────┐  ┌───────────────────────────────────────┐
 │      SUPABASE (Database)         │  │         POKEAPI (External)            │
 │  PostgreSQL                      │  │   https://pokeapi.co/api/v2           │
-│  kwrhzjuufxwedzbsxjjj.supabase.co│  │                                       │
+│  [your-project].supabase.co     │  │                                       │
 ├──────────────────────────────────┤  ├───────────────────────────────────────┤
 │                                  │  │                                       │
 │  ┌────────────────────────────┐  │  │  - Pokemon data by name/ID            │
